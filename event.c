@@ -97,13 +97,14 @@ void event_queue_push(EventQueue *queue, const Event *event) {
 int event_queue_pop(EventQueue *queue, Event *event) {
     // Temporarily, this only returns 0 so that it is ignored 
     // during early testing. Replace this with the correct logic.
-    if (queue->size == 0){
-        return 0;
+    if (queue->head != NULL){
+        
+        EventNode *temp = queue->head;
+       (*event) = temp->event;
+        queue->head = temp->next;
+        free(temp);
+        queue->size--;
+        return 1;
     }
-    EventNode *temp = queue->head;
-    (*event) = temp->event;
-    queue->head = temp->next;
-    free(temp);
-    queue->size--;
-    return 1;
+    return 0;
 }

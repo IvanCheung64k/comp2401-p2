@@ -11,6 +11,20 @@ int main(void) {
     manager_init(&manager);
     load_data(&manager);
 
+    pthread_t managerThread;
+    pthread_t systemThread[manager.system_array.size];
+
+    pthread_create(&managerThread, NULL, manager_thread, &manager)
+    for (int i = 0; i<manager.system_array.size; i++){
+        pthread_create(&systemThread[i], NULL, system_thread, manager.system_array.systems[i]);
+    }
+
+    pthread_join(managerThread, NULL);
+
+    for (int i = 0; i<manager.system_array.size; i++){
+        pthread_join(systemThread[i], NULL)
+    }
+
     while (manager.simulation_running) {
         manager_run(&manager);
         for (int i = 0; i < manager.system_array.size; ++i) {

@@ -133,3 +133,5 @@ void resource_array_clean(ResourceArray *array);
 void resource_array_add(ResourceArray *array, Resource *resource);
 
 // Multithreading
+void* system_thread(void*SystemArg);
+void* manager_thread(void*ManagerArg);

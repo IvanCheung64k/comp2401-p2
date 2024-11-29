@@ -251,3 +251,10 @@ void system_array_add(SystemArray *array, System *system) {
     }
     array->systems[array->size++] = system;
 }
+
+void *system_thread(void*SystemArg){
+    System *system = systemArg;
+    while (system->status != TERMINATE){
+        system_run(system);
+    }
+}
