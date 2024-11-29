@@ -64,28 +64,24 @@ void event_queue_clean(EventQueue *queue) {
  */
 void event_queue_push(EventQueue *queue, const Event *event) {
     EventNode* temp = queue->head;
-    EventNode* insert;
+    EventNode* insert, *insertPrev;
     insert = (EventNode*)malloc(sizeof(EventNode));
+    insertPrev = NULL;
     insert->event = (*event);
-    if (queue->size == 0){
-        queue->head = insert;
-        return;
-    }
-    for (int i = 0; i<queue->size; i++){
-        if (temp->event.priority<event->priority){
-            insert->next = temp;
-            if (temp == queue->head){
-                queue->head = insert;
-            }
+    while (temp != NULL){
+        if (temp->event.priority < insert->event.priority){
             break;
         }
-        else {
-            temp = temp->next;
-        }
+        insertPrev = temp;
+        temp = temp->next;
     }
-    if (temp->next == NULL){
-        temp->next = insert;
+    if (insertPrev == NULL){
+        queue->head = insert;
     }
+    else {
+        insertPrev->next = insert;
+    }
+    insert->next = temp;
     queue->size++;
 }
 
@@ -104,8 +100,10 @@ int event_queue_pop(EventQueue *queue, Event *event) {
     if (queue->size == 0){
         return 0;
     }
-    (*event) = queue->head->event;
-    queue->head = queue->head->next;
+    EventNode *temp = queue->head;
+    (*event) = temp->event;
+    queue->head = temp->next;
+    free(temp);
     queue->size--;
     return 1;
 }
