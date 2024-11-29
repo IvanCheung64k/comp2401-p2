@@ -35,6 +35,7 @@ typedef struct Resource {
     char *name;      // Dynamically allocated string
     int amount;
     int max_capacity;
+    sem_t mutex;
 } Resource;
 
 // Represents the amount of a resource consumed/produced for a single system
@@ -73,6 +74,7 @@ typedef struct EventNode {
 typedef struct EventQueue {
     EventNode *head;
     int size;
+    sem_t mutex;
 } EventQueue;
 
 // A basic dynamic array to store all of the systems in the simulation
@@ -133,5 +135,5 @@ void resource_array_clean(ResourceArray *array);
 void resource_array_add(ResourceArray *array, Resource *resource);
 
 // Multithreading
-void* system_thread(void*SystemArg);
-void* manager_thread(void*ManagerArg);
+void* sys_thread(void*SystemArg);
+void* mngr_thread(void*ManagerArg);

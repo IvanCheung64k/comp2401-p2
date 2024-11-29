@@ -102,7 +102,7 @@ static int system_convert(System *system) {
     int status;
     Resource *consumed_resource = system->consumed.resource;
     int amount_consumed = system->consumed.amount;
-
+    sem_wait(&consumed_resource->mutex);
     // We can always convert without consuming anything
     if (consumed_resource == NULL) {
         status = STATUS_OK;
@@ -126,7 +126,7 @@ static int system_convert(System *system) {
             system->amount_stored = 0;
         }
     }
-
+    sem_post(&consumed_resource->mutex);
     return status;
 }
 
@@ -171,7 +171,7 @@ static void system_simulate_process_time(System *system) {
 static int system_store_resources(System *system) {
     Resource *produced_resource = system->produced.resource;
     int available_space, amount_to_store;
-
+    sem_wait(&produced_resource->mutex);
     // We can always proceed if there's nothing to store
     if (produced_resource == NULL || system->amount_stored == 0) {
         system->amount_stored = 0;
@@ -196,7 +196,7 @@ static int system_store_resources(System *system) {
     if (system->amount_stored != 0) {
         return STATUS_CAPACITY;
     }
-
+    sem_post(&produced_resource->mutex);
     return STATUS_OK;
 }
 
@@ -252,9 +252,10 @@ void system_array_add(SystemArray *array, System *system) {
     array->systems[array->size++] = system;
 }
 
-void *system_thread(void*SystemArg){
-    System *system = systemArg;
+void *sys_thread(void*SystemArg){
+    System *system = SystemArg;
     while (system->status != TERMINATE){
         system_run(system);
     }
+    return NULL;
 }

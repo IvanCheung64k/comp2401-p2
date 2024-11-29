@@ -23,6 +23,7 @@ void resource_create(Resource **resource, const char *name, int amount, int max_
 
     (*resource)->name = (char*)malloc(strlen(name)+1);
     strcpy((*resource)->name, name);
+    sem_init(&(*resource)->mutex, 0, 1);
 }
 
 
@@ -34,6 +35,7 @@ void resource_create(Resource **resource, const char *name, int amount, int max_
  * @param[in,out] resource  Pointer to the `Resource` to be destroyed.
  */
 void resource_destroy(Resource *resource) {
+    sem_destroy(&resource->mutex);
     free(resource->name);
     free(resource);
 }
@@ -96,6 +98,7 @@ void resource_array_add(ResourceArray *array, Resource *resource) {
     if (array->size == array->capacity){
         Resource** temp;
         temp = (Resource**)calloc(array->capacity*2, sizeof(Resource*));
+
         for (int i = 0; i < array->size; i++){
             temp[i] = array->resources[i];
         }
@@ -105,4 +108,5 @@ void resource_array_add(ResourceArray *array, Resource *resource) {
         array->capacity *=2;
     }
     array->resources[array->size++] = resource;
+
 }

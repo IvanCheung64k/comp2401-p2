@@ -36,6 +36,7 @@ void event_init(Event *event, System *system, Resource *resource, int status, in
 void event_queue_init(EventQueue *queue) {
     queue->head = NULL;
     queue->size = 0;
+    sem_init(&queue->mutex, 0, 1);
 }
 
 /**
@@ -52,6 +53,7 @@ void event_queue_clean(EventQueue *queue) {
         free(queue->head);
         queue->head = temp;
     }
+    sem_destroy(&queue->mutex);
 }
 
 /**
@@ -68,6 +70,7 @@ void event_queue_push(EventQueue *queue, const Event *event) {
     insert = (EventNode*)malloc(sizeof(EventNode));
     insertPrev = NULL;
     insert->event = (*event);
+    sem_wait(&queue->mutex);
     while (temp != NULL){
         if (temp->event.priority < insert->event.priority){
             break;
@@ -83,6 +86,7 @@ void event_queue_push(EventQueue *queue, const Event *event) {
     }
     insert->next = temp;
     queue->size++;
+    sem_post(&queue->mutex);
 }
 
 /**
@@ -97,6 +101,7 @@ void event_queue_push(EventQueue *queue, const Event *event) {
 int event_queue_pop(EventQueue *queue, Event *event) {
     // Temporarily, this only returns 0 so that it is ignored 
     // during early testing. Replace this with the correct logic.
+    sem_wait(&queue->mutex);
     if (queue->head != NULL){
         
         EventNode *temp = queue->head;
@@ -104,7 +109,9 @@ int event_queue_pop(EventQueue *queue, Event *event) {
         queue->head = temp->next;
         free(temp);
         queue->size--;
+        sem_post(&queue->mutex);
         return 1;
     }
+    sem_post(&queue->mutex);
     return 0;
 }
